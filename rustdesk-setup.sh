@@ -131,8 +131,8 @@ sleep 10
 check_installation() {
     local all_success=true
     
-    # 从 rustdesk-api 日志中提取随机密码，修正提取方式
-    local admin_password=$(docker logs rustdesk-api 2>&1 | grep "Admin Password Is:" | cut -d' ' -f5)
+    # 使用 grep 和 sed 更精确地提取密码
+    local admin_password=$(docker logs rustdesk-api 2>&1 | grep "Admin Password Is:" | sed -n 's/.*Admin Password Is: \([^ ]*\).*/\1/p')
     
     # 检查所有容器是否运行
     echo -e "\n正在检查服务状态..."
