@@ -47,22 +47,15 @@ fi
 
 echo "环境检查通过，开始安装 RustDesk 服务..."
 
-# 设置终端编码
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-
-# 使用 stty 设置终端属性
-stty erase ^H
-
 # 获取用户输入的服务器信息
-read -e -r -p $'\033[0m请输入RUSTDESK服务器IP或者域名（例如：rt.123456.xyz）: ' SERVER_HOST
+read -p "请输入RUSTDESK服务器IP或者域名（例如：rt.123456.xyz）: " SERVER_HOST
 if [ -z "$SERVER_HOST" ]; then
     echo "错误：服务器地址不能为空！"
     exit 1
 fi
 
 # 获取用户输入的Key
-read -e -r -p $'\033[0m请输入服务器的Key（直接回车使用默认值:def12345）: ' SERVER_KEY
+read -p "请输入服务器的Key（直接回车使用默认值:def12345）: " SERVER_KEY
 if [ -z "$SERVER_KEY" ]; then
     SERVER_KEY="def12345"
     echo "使用默认Key: def12345"
