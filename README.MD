@@ -4,7 +4,14 @@
 如果想要一键完成所有操作，可以使用以下命令组合：
 
 ```bash
-wget https://raw.githubusercontent.com/moshouhot/rustdesk-setup/main/rustdesk-setup.sh && chmod +x rustdesk-setup.sh && sudo ./rustdesk-setup.sh
+# 清理现有环境
+rm rustdesk-setup.sh
+rm -rf /opt/rustdesk/*
+
+# 重新下载和运行脚本
+wget -O rustdesk-setup.sh https://raw.githubusercontent.com/moshouhot/rustdesk-setup/main/rustdesk-setup.sh
+chmod +x rustdesk-setup.sh
+./rustdesk-setup.sh
 ```
 
 # 注意事项

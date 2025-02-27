@@ -23,9 +23,12 @@ fi
 # 检查并安装 Docker Compose
 if ! command -v docker-compose > /dev/null; then
     echo "Docker Compose 未安装，正在安装..."
+    # 下载 docker-compose
     curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    # 立即添加执行权限
     chmod +x /usr/local/bin/docker-compose
-    if ! command -v docker-compose > /dev/null; then
+    # 验证安装
+    if ! docker-compose --version; then
         echo "Docker Compose 安装失败，请手动检查安装过程。"
         exit 1
     fi
@@ -110,6 +113,75 @@ docker-compose up -d
 echo "等待服务启动..."
 sleep 10
 
+# 检查服务安装状态
+check_installation() {
+    local all_success=true
+    
+    # 检查所有容器是否运行
+    echo -e "\n正在检查服务状态..."
+    
+    # 检查 rustdesk-api 容器
+    if docker ps | grep -q "rustdesk-api"; then
+        echo "✅ rustdesk-api 服务运行正常"
+    else
+        echo "❌ rustdesk-api 服务未正常运行"
+        all_success=false
+    fi
+    
+    # 检查 hbbs 容器
+    if docker ps | grep -q "hbbs"; then
+        echo "✅ hbbs 服务运行正常"
+    else
+        echo "❌ hbbs 服务未正常运行"
+        all_success=false
+    fi
+    
+    # 检查 hbbr 容器
+    if docker ps | grep -q "hbbr"; then
+        echo "✅ hbbr 服务运行正常"
+    else
+        echo "❌ hbbr 服务未正常运行"
+        all_success=false
+    fi
+    
+    # 检查端口是否正常监听
+    echo -e "\n检查端口状态..."
+    if netstat -tuln | grep -q ":21114"; then
+        echo "✅ API端口 (21114) 正常监听"
+    else
+        echo "❌ API端口 (21114) 未正常监听"
+        all_success=false
+    fi
+    
+    if netstat -tuln | grep -q ":21116"; then
+        echo "✅ ID服务端口 (21116) 正常监听"
+    else
+        echo "❌ ID服务端口 (21116) 未正常监听"
+        all_success=false
+    fi
+    
+    if netstat -tuln | grep -q ":21117"; then
+        echo "✅ 中继服务端口 (21117) 正常监听"
+    else
+        echo "❌ 中继服务端口 (21117) 未正常监听"
+        all_success=false
+    fi
+    
+    # 显示安装结果
+    echo -e "\n安装状态检查完成！"
+    if [ "$all_success" = true ]; then
+        echo "✅ RustDesk 服务安装成功并正常运行！"
+        echo -e "\n服务访问信息："
+        echo "API服务: http://$(hostname -I | awk '{print $1}'):21114"
+        echo "ID服务: $(hostname -I | awk '{print $1}'):21116"
+        echo "中继服务: $(hostname -I | awk '{print $1}'):21117"
+        return 0
+    else
+        echo "❌ RustDesk 服务安装可能存在问题，请检查上述日志进行排查。"
+        return 1
+    fi
+}
+
 # 显示容器运行状态
 echo -e "\n检查容器状态："
 docker ps
@@ -123,4 +195,8 @@ docker logs hbbs
 echo -e "\nhbbr 日志"
 docker logs hbbr
 
-echo -e "\n安装完成！请检查上述日志确认服务是否正常运行。"
+# 执行安装检查
+check_installation
+
+# 根据检查结果设置退出状态
+exit $?
