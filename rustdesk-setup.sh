@@ -185,10 +185,11 @@ check_installation() {
     echo -e "\n安装状态检查完成！"
     if [ "$all_success" = true ]; then
         echo "✅ RustDesk 服务安装成功并正常运行！"
-        echo -e "\n服务访问信息："
-        echo "API服务: http://$(hostname -I | awk '{print $1}'):21114"
-        echo "ID服务: $(hostname -I | awk '{print $1}'):21116"
-        echo "中继服务: $(hostname -I | awk '{print $1}'):21117"
+        echo -e "\n服务访问信息：（请将以下信息保存到本地）"
+        echo "API服务: http://${SERVER_HOST}:21114"
+        echo "ID服务: ${SERVER_HOST}:21116"
+        echo "中继服务: ${SERVER_HOST}:21117"
+        echo -e "\n服务器Key: ${SERVER_KEY}"
         return 0
     else
         echo "❌ RustDesk 服务安装可能存在问题，请检查上述日志进行排查。"
