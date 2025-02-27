@@ -47,12 +47,26 @@ fi
 
 echo "环境检查通过，开始安装 RustDesk 服务..."
 
+# 获取用户输入的服务器信息
+read -p "请输入RUSTDESK服务器IP或者域名（例如：rt.123456.xyz）: " SERVER_HOST
+if [ -z "$SERVER_HOST" ]; then
+    echo "错误：服务器地址不能为空！"
+    exit 1
+fi
+
+# 获取用户输入的Key
+read -p "请输入服务器的Key（直接回车使用默认值:def12345）: " SERVER_KEY
+if [ -z "$SERVER_KEY" ]; then
+    SERVER_KEY="def12345"
+    echo "使用默认Key: def12345"
+fi
+
 # 创建所需目录
 mkdir -p /opt/rustdesk/data/rustdesk-api
 mkdir -p /opt/rustdesk/data/rustdesk-server
 
 # 创建并写入 docker-compose.yml
-cat > /opt/rustdesk/docker-compose.yml << 'EOF'
+cat > /opt/rustdesk/docker-compose.yml << EOF
 version: '3'
 
 services:
@@ -60,10 +74,10 @@ services:
     container_name: rustdesk-api
     environment:
       - TZ=Asia/Shanghai
-      - RUSTDESK_API_RUSTDESK_ID_SERVER=hk.666606.xyz:21116
-      - RUSTDESK_API_RUSTDESK_RELAY_SERVER=hk.666606.xyz:21117
-      - RUSTDESK_API_RUSTDESK_API_SERVER=http://hk.666606.xyz:21114
-      - RUSTDESK_API_RUSTDESK_KEY=def12345
+      - RUSTDESK_API_RUSTDESK_ID_SERVER=${SERVER_HOST}:21116
+      - RUSTDESK_API_RUSTDESK_RELAY_SERVER=${SERVER_HOST}:21117
+      - RUSTDESK_API_RUSTDESK_API_SERVER=http://${SERVER_HOST}:21114
+      - RUSTDESK_API_RUSTDESK_KEY=${SERVER_KEY}
     ports:
       - "21114:21114"
     image: lejianwen/rustdesk-api
@@ -77,10 +91,10 @@ services:
     container_name: hbbs
     image: rustdesk/rustdesk-server:latest
     environment:
-      - RELAY=hk.666606.xyz:21117
+      - RELAY=${SERVER_HOST}:21117
       - ENCRYPTED_ONLY=1
-      - KEY=def12345
-    command: ["hbbs", "-k", "def12345"]
+      - KEY=${SERVER_KEY}
+    command: ["hbbs", "-k", "${SERVER_KEY}"]
     volumes:
       - /opt/rustdesk/data/rustdesk-server:/root
     network_mode: host
@@ -92,8 +106,8 @@ services:
     container_name: hbbr
     image: rustdesk/rustdesk-server:latest
     environment:
-      - KEY=def12345
-    command: ["hbbr", "-k", "def12345"]
+      - KEY=${SERVER_KEY}
+    command: ["hbbr", "-k", "${SERVER_KEY}"]
     volumes:
       - /opt/rustdesk/data/rustdesk-server:/root
     network_mode: host
