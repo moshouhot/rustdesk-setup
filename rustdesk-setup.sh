@@ -131,6 +131,9 @@ sleep 10
 check_installation() {
     local all_success=true
     
+    # 从 rustdesk-api 日志中提取随机密码
+    local admin_password=$(docker logs rustdesk-api 2>&1 | grep "Admin Password Is:" | awk '{print $5}')
+    
     # 检查所有容器是否运行
     echo -e "\n正在检查服务状态..."
     
@@ -186,10 +189,14 @@ check_installation() {
     if [ "$all_success" = true ]; then
         echo "✅ RustDesk 服务安装成功并正常运行！"
         echo -e "\n服务访问信息：（请将以下信息保存到本地）"
-        echo "后台访问地址: http://${SERVER_HOST}:21114 默认用户名密码为admin，请尽快修改。"
+        echo "后台访问地址: http://${SERVER_HOST}:21114"
+        echo "登录信息："
+        echo "  - 用户名：admin"
+        echo "  - 密码：${admin_password}    (首次登录请立即修改密码)"
+        echo -e "\n服务器配置："
         echo "ID服务器: ${SERVER_HOST}:21116"
         echo "中继服务器: ${SERVER_HOST}:21117"
-        echo -e "\nKey: ${SERVER_KEY}"
+        echo "Key: ${SERVER_KEY}"
         return 0
     else
         echo "❌ RustDesk 服务安装可能存在问题，请检查上述日志进行排查。"
