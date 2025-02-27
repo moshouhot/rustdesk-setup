@@ -67,7 +67,7 @@ mkdir -p /opt/rustdesk/data/rustdesk-server
 
 # 创建并写入 docker-compose.yml
 cat > /opt/rustdesk/docker-compose.yml << EOF
-version: '3'
+
 
 services:
   rustdesk-api:
